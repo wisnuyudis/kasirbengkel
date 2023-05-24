@@ -1,0 +1,69 @@
+.nama-barang-container {
+	display:flex;
+	justify-content: space-between;
+}
+
+.nama-barang-container .input-group {
+	flex-wrap: nowrap;
+    align-items: center;
+}
+
+.btn-item-option {
+	padding: 0;
+	padding-left: 10px;
+	border: 0;
+}
+.btn-item-option:hover {
+	padding: 0;
+	padding-left: 10px;
+	border: 0;
+}
+.del-diskon:hover {
+	padding: 0;
+	padding-left: 5px;
+	border: 0;
+}
+
+.barang-pilih-empty {
+	height: 100%;
+	padding-top: 10px;
+}
+
+.del-customer {
+	width: 64px;
+}
+
+.pembeli-nama {
+	font-size: 120%;
+    margin: auto;
+    margin-left: 0;
+}
+
+.item-menu {
+	position: relative;
+}
+
+.del-diskon {
+	padding-right: 0;
+    padding-left: 5px;
+}
+
+.diskon-row td{
+	padding-top: 0 !important;
+}
+
+.right-panel-footer button {
+	width: 100%;
+	height: 50px;
+}
+
+@media screen and (max-width: 540px) {
+	
+	.tabel-barang-pilih td {
+		padding-right: 0;
+	}
+	.nama-barang {
+		margin-right: 5px;
+		display: inline-block;
+	}
+}

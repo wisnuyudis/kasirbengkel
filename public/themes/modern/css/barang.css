@@ -1,0 +1,12 @@
+/**
+* @author Agus Prawoto Hadi
+* @url https://jagowebdev.com
+* @copyright Agus Prawoto Hadi
+* @notice You can use this code for personal use only, you are not allowed to republish or to sell !!!.
+*/
+li.parent {
+	cursor: pointer;
+}
+li.parent:hover {
+	background: #e4e9ee;
+}

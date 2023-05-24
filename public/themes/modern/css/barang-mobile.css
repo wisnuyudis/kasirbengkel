@@ -1,0 +1,7 @@
+.right-panel-footer {
+	border-top: 1px solid #e4e5e7;
+}
+
+.right-panel-body {
+    bottom: calc(var(--fixed-margin-bottom) + 80px);
+}
