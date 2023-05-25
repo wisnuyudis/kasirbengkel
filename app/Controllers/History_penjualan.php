@@ -76,7 +76,7 @@ class History_penjualan extends \App\Controllers\BaseController
 				$data['msg'] = ['status' => 'error', 'message' => 'Data penjualan gagal dihapus'];
 			}
 		}
-		$data['customer'] = $this->model->getCustomer($id);
+		$data['customer'] = $this->model->getCustomer($id) ? $this->model->getCustomer($id) : (object) array('nama_customer' => 'umum');
 		$this->view('penjualan-history-detail.php', $data);
 	}
 	
@@ -597,7 +597,7 @@ class History_penjualan extends \App\Controllers\BaseController
 		
 		$this->hasPermissionPrefix('read');
 
-		$id = $this->request->getGet('id');
+		$id = $this->request->getGet('id') ? $this->request->getGet('id') : null;
 		$startDate = $this->request->getGet('startDate');
 		$endDate = $this->request->getGet('endDate');
 		

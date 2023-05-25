@@ -463,10 +463,13 @@ class PenjualanModel extends \App\Models\BaseModel
 	}
 
 	public function countAllDataPenjualanDetail($id,$startDate,$endDate) {
-		if($startDate == null && $endDate == null){
+		if($id == null && $startDate == null && $endDate == null){
+			$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE customer.id_customer IS NULL';
+		} else if ($id == null){
+			$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE customer.id_customer IS NULL AND tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'"';
+		} else if($startDate == null && $endDate == null){
 			$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE customer.id_customer LIKE ' .$id;
 		} else {
-		
 			$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE customer.id_customer LIKE ' .$id. 'AND tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'"';
 		}
 		$result = $this->db->query($sql)->getRow();
@@ -531,7 +534,11 @@ class PenjualanModel extends \App\Models\BaseModel
 		// Search
 		$search_all1 = @$this->request->getPost('search')['value'];
 		$search_all = str_replace(' ','%',$search_all1);
-		if ($startDate == '' && $endDate == ''){
+		if ($id == NULL && $startDate == '' && $endDate == ''){
+			$where = 'WHERE id_customer IS NULL'; 
+		} else if ($id == null){
+			$where = 'WHERE id_customer IS NULL AND tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'" ';
+		} else if ($startDate == '' && $endDate == ''){
 			$where = 'WHERE id_customer LIKE '.$id;
 		} else {
 			$where = 'WHERE id_customer LIKE '.$id.' AND tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'" ';
