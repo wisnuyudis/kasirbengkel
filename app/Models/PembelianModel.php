@@ -133,13 +133,18 @@ class PembelianModel extends \App\Models\BaseModel
 		$data_db['tgl_jatuh_tempo'] = $y . '-' . $m . '-' . $d;
 
 		$data_db['sub_total'] = str_replace('.', '', trim($_POST['sub_total']));
+		$data_db['diskon_jenis_sub'] = $_POST['diskon_jenis_sub'];
 		$data_db['diskon'] = str_replace('.', '', trim($_POST['diskon']));
+
+		$data_db['ppn'] = str_replace('.', '', trim($_POST['ppn']));
+		$data_db['jumlah_ppn'] = str_replace('.', '', trim($_POST['ppntotal']));
+
 		if ($data_db['sub_total'] - $data_db['diskon'] < 0) {
 			$total = 0;
 		} else {
 			$total = $data_db['sub_total'] - $data_db['diskon'];
 		}
-		$data_db['total'] = $total;
+		$data_db['total'] = $total + $data_db['jumlah_ppn'];
 
 		// Bayar
 		$data_db['total_bayar'] = str_replace('.', '', trim($_POST['total_bayar']));
@@ -443,13 +448,13 @@ class PembelianModel extends \App\Models\BaseModel
 		$request = \Config\Services::request();
 		$this->get_datatables_ajaxdttabletempo();
 		if ($request->getPost('tempo')) {
-			if ($request->getPost('tempo')=='tujuhari') {
+			if ($request->getPost('tempo') == 'tujuhari') {
 				$this->builder->where('tgl_jatuh_tempo >=', date('Y-m-d'));
 				$this->builder->where('tgl_jatuh_tempo <=', date('Y-m-d', strtotime($date . ' +7 day')));
-			}else{
+			} else {
 				$this->builder->where('tgl_jatuh_tempo <=', date('Y-m-d', strtotime($date . ' -30 day')));
 			}
-		 } else {
+		} else {
 			if ($request->getPost('tgl_awal')) {
 				$this->builder->where('tgl_invoice >=', $request->getPost('tgl_awal'));
 			}
@@ -457,7 +462,7 @@ class PembelianModel extends \App\Models\BaseModel
 				$this->builder->where('tgl_invoice <=', $request->getPost('tgl_akhir'));
 			}
 		}
-		
+
 
 		if ($request->getPost('length') != -1) {
 			$this->builder->limit($request->getPost('length'), $request->getPost('start'));
@@ -547,5 +552,13 @@ class PembelianModel extends \App\Models\BaseModel
 			'sebulan' => $sebulan['id_pembelian']
 		);
 		return $data;
+	}
+
+	function tes()
+	{
+		$result['status'] = 'ok';
+		$result['message'] = 'Data berhasil disimpan';
+
+		return $result;
 	}
 }
