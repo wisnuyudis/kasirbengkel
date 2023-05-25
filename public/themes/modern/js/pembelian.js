@@ -437,6 +437,7 @@ jQuery(document).ready(function () {
 			total = 0;
 		}
 		$table.find('.sub-total').val(sub_total).trigger('keyup');
+		$table.find('.ppn').trigger('keyup');
 		$table.find('.total').val(total).trigger('keyup');
 		
 		$('#list-pembayaran').find('.total-tagihan').val(total).trigger('keyup');
@@ -483,9 +484,22 @@ jQuery(document).ready(function () {
 		}
 		
 	});
+
+	$('table').delegate('.dbjt', 'change', function() 
+	{
+		$('.diskon').eq(0).trigger('keyup');
+	});
 	
 	$('.diskon').keyup(function() {
-		total = setInt( $('#list-barang').find('.sub-total').val() ) - setInt(this.value);
+		djt = $('#list-barang').find('.dbjt').val();
+		if(djt == '%'){
+			diskon = setInt(this.value) / 100;
+		} else {
+			diskon = setInt(this.value);
+		}
+
+		total = setInt( $('#list-barang').find('.sub-total').val() ) - diskon;
+		$('.ppn').eq(0).trigger('keyup');
 		$('.total, .total-tagihan').val(format_ribuan(total));
 		$('.item-bayar').eq(0).trigger('keyup');
 	
@@ -498,5 +512,28 @@ jQuery(document).ready(function () {
 		}
 		$('.total').val(neto);
 		$('.total').trigger('keyup'); */
+	});
+
+	$('.ppn').keyup(function() {
+		djt = $('#list-barang').find('.dbjt').val();
+		diskon = setInt($('#list-barang').find('.diskon').val());
+		sub_total = setInt($('#list-barang').find('.sub-total').val());
+		ppn = setInt($('#list-barang').find('.ppn').val()) / 100;
+
+		if(djt == '%'){
+			diskon = sub_total * diskon / 100;
+		} else {
+			diskon = diskon;
+		}
+
+		
+
+		jumlahppn = (sub_total - diskon) * ppn;
+
+		total = sub_total - diskon + jumlahppn;
+
+		$('.jumlah_ppn').val(total).val(format_ribuan(jumlahppn));
+		$('.total, .total-tagihan').val(format_ribuan(total));
+		$('.item-bayar').eq(0).trigger('keyup');
 	})
 });
