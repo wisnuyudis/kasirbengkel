@@ -122,6 +122,9 @@ class Pembelian extends \App\Controllers\BaseController
 			$this->saveData();
 			if (!empty($this->data['message']['id_pembelian'])) {
 				$id_pembelian = $this->data['message']['id_pembelian'];
+				if ($this->data['message']['status'] == 'ok') {
+					return redirect()->to("pembelian");
+				}
 			}
 			$this->setEdit();
 		}
@@ -246,6 +249,9 @@ class Pembelian extends \App\Controllers\BaseController
 		$this->data['msg'] = [];
 		if (isset($_POST['submit'])) {
 			$this->saveData();
+			if ($this->data['message']['status'] == 'ok') {
+				return redirect()->to("pembelian");
+			}
 		}
 
 		$this->setData($_GET['id']);
@@ -394,7 +400,7 @@ class Pembelian extends \App\Controllers\BaseController
 	}
 
 	public function tempo($hutang = null)
-	{	
+	{
 		$this->data['tempo'] = $hutang;
 		$this->data['title'] = 'Pembelian';
 		// $this->data['hutang'] = $this->model->getHutangg();
