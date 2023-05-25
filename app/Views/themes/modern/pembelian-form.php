@@ -167,7 +167,7 @@
 								</td>
 								<td>
 								<div class="input-group">'
-								. options(['name' => 'diskon_jenis[]', 'class' => 'dbj', 'style' => 'width:auto'], ['%' => '%', 'rp' => 'Rp'], @$val['diskon_jenis'])
+								. options(['name' => 'diskon_jenis[]', 'class' => 'dbj', 'style' => 'width:auto'], ['rp' => 'Rp', '%' => '%'], @$val['diskon_jenis'])
 								. '
 								<input type="text" size="4" class="form-control text-end db" style="width:100px" name="diskon_nilai[]" value="' . format_number(@$val['diskon_nilai']) . '"/>
 								</div>
@@ -193,13 +193,32 @@
 									</tr>
 									<tr>
 										<td></td>
-										<td>Diskon RP</td>
+										<td>Diskon</td>
 										<td></td>
 										<td></td>
 										<td></td>
 										<td></td>
-										<td></td>
+										<td>
+										<div class="input-group">'
+							. options(['name' => 'diskon_jenis_sub[]', 'class' => 'dbjt', 'style' => 'width:auto'], ['rp' => 'Rp', '%' => '%' ], @$val['diskon_jenis_sub'])
+							. '
+								</div>
+										</td>
 										<td><input size="6" class="form-control text-end format-ribuan diskon" type="text" name="diskon" value="' . set_value('diskon', format_number(@$pembelian['diskon'])) . '" required="required"/>
+										</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td></td>
+										<td>PPN %</td>
+										<td></td>
+										<td></td>
+										<td></td>
+										<td></td>
+										<td>
+										<input size="6" class="form-control text-end ppn" type="text" name="ppn" value=" ' . set_value('ppn', format_number(@$pembelian['ppn'])) . '"/>
+										</td>
+										<td><input size="6" class="form-control text-end format-ribuan jumlah_ppn" type="text" name="jumlah_ppn" value="' . set_value('jumlah_ppn', format_number(@$pembelian['jumlah_ppn'])) . '" required="required" readonly/>
 										</td>
 										<td></td>
 									</tr>
