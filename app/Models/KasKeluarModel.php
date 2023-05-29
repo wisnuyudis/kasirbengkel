@@ -8,7 +8,7 @@
 
 namespace App\Models;
 
-class KasModel extends \App\Models\BaseModel
+class KasKeluarModel extends \App\Models\BaseModel
 {
 	public function deleteData() 
 	{
@@ -66,7 +66,7 @@ class KasModel extends \App\Models\BaseModel
 		$data_db['nilai'] = $_POST['nilai'];
 		$data_db['keterangan'] = $_POST['keterangan'];
 		$data_db['date'] = $_POST['date'];
-		$data_db['type'] = 'masuk';
+		$data_db['type'] = 'keluar';
 		
 		if ($_POST['id']) 
 		{
@@ -89,7 +89,7 @@ class KasModel extends \App\Models\BaseModel
 	}
 	
 	public function countAllData() {
-		$sql = 'SELECT COUNT(*) AS jml FROM kas WHERE type LIKE "masuk"';
+		$sql = 'SELECT COUNT(*) AS jml FROM kas WHERE type LIKE "keluar"';
 		$result = $this->db->query($sql)->getRow();
 		return $result->jml;
 	}
@@ -99,7 +99,7 @@ class KasModel extends \App\Models\BaseModel
 		$columns = $this->request->getPost('columns');
 
 		// Search
-		$where = ' WHERE type LIKE "masuk" ';
+		$where = ' WHERE type LIKE "keluar" ';
 		$search_all1 = @$this->request->getPost('search')['value'];
 		$search_all = str_replace(' ','%',$search_all1);
 		if ($search_all) {

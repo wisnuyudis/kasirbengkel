@@ -7,10 +7,10 @@
 */
 
 namespace App\Controllers;
-use App\Models\KasModel;
+use App\Models\KasKeluarModel;
 use App\Models\PenjualanModel;
 
-class Kas_masuk extends \App\Controllers\BaseController
+class Kas_keluar extends \App\Controllers\BaseController
 {
 	protected $model;
 	protected $modelpenjualan;
@@ -18,9 +18,9 @@ class Kas_masuk extends \App\Controllers\BaseController
 	public function __construct() {
 		
 		parent::__construct();
-		$this->model = new KasModel;
+		$this->model = new KasKeluarModel;
 		$this->modelpenjualan = new PenjualanModel;
-		$this->data['site_title'] = 'Kas Masuk';
+		$this->data['site_title'] = 'Kas Keluar';
 		
 		$this->addJs ( $this->config->baseURL . 'public/vendors/jquery.select2/js/select2.full.min.js' );
 		$this->addStyle ( $this->config->baseURL . 'public/vendors/jquery.select2/css/select2.min.css' );
@@ -33,7 +33,7 @@ class Kas_masuk extends \App\Controllers\BaseController
 	public function index()
 	{
 		$this->hasPermission('read_all');
-		$this->view('kas-masuk.php', $this->data);
+		$this->view('kas-keluar.php', $this->data);
 	}
 	
 	public function ajaxDeleteData() {
@@ -60,7 +60,7 @@ class Kas_masuk extends \App\Controllers\BaseController
 		}
 		
 		$this->data = array_merge($this->data, $this->setData());
-		echo view('themes/modern/kas-masuk-form.php', $this->data);
+		echo view('themes/modern/kas-keluar-form.php', $this->data);
 	}
 
 	private function setData() 
