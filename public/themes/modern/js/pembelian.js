@@ -208,7 +208,8 @@ jQuery(document).ready(function () {
 		$(document)
 		.undelegate('.pilih-barang', 'click')
 		.delegate('.pilih-barang', 'click', function() {
-			
+			// var row = $(this).closest("tr");
+
 			$('#using-list-barang').val(1);
 			$table = $('#list-barang');
 
@@ -221,6 +222,7 @@ jQuery(document).ready(function () {
 			satuan = $td.eq(3).html();
 			harga_modal = $td.eq(5).html();
 			harga = $td.eq(6).html();
+			harga_beli = $td.eq(4).text();
 			$this.attr('disabled', 'disabled');
 			
 			// List barang
@@ -245,9 +247,11 @@ jQuery(document).ready(function () {
 			$td.eq(2).find('input').val('');
 
 			$td.eq(3).find('input').val("");
-			$td.eq(4).find('input').val("");
-			$td.eq(5).find('input').val('');
+			$td.eq(4).find('input').val(harga_beli);
+			$td.eq(5).find('input').val("");
 			$td.eq(5).find('.satuan').text(satuan);
+			$td.eq(6).find('input').val("");
+			$td.eq(7).find('input').val("");
 			
 			$table.show();
 			$tbody.append($tr);
@@ -447,6 +451,10 @@ jQuery(document).ready(function () {
 	
 	$('table').delegate('.del-row', 'click', function() 
 	{
+		$tr = $(this).parents('tr').eq(0);
+		$td = $tr.find('td');
+		
+
 		$this = $(this);
 		$table = $this.parents('table');
 		$tbody = $table.find('tbody').eq(0);
@@ -468,11 +476,18 @@ jQuery(document).ready(function () {
 				$(elm).find('td').eq(0).html(i + 1);
 			});
 		}
+
+		sub = setInt($table.find('.sub-total').val());
+		sat = setInt($td.eq(7).find('input').val());
+
+		sub_total = sub - sat;
 		
 		if (id == 'list-pembayaran') {
 			$tbody.find('.item-bayar').eq(0).trigger('keyup');
 		} else if (id == 'list-barang') {
-			$tbody.find('.harga-satuan').eq(0).trigger('keyup');
+			// $tbody.find('.harga-satuan').eq(0).trigger('keyup');
+			$table.find('.sub-total').val(format_ribuan(sub_total)).trigger('keyup');
+			$table.find('.ppn').trigger('keyup');
 		}
 	});
 	
@@ -493,7 +508,7 @@ jQuery(document).ready(function () {
 	$('.diskon').keyup(function() {
 		djt = $('#list-barang').find('.dbjt').val();
 		if(djt == '%'){
-			diskon = setInt(this.value) / 100;
+			diskon = Math.round(this.value / 100);
 		} else {
 			diskon = setInt(this.value);
 		}
@@ -521,7 +536,7 @@ jQuery(document).ready(function () {
 		ppn = setInt($('#list-barang').find('.ppn').val()) / 100;
 
 		if(djt == '%'){
-			diskon = sub_total * diskon / 100;
+			diskon = Math.round(sub_total * diskon / 100);
 		} else {
 			diskon = diskon;
 		}
