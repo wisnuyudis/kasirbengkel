@@ -296,7 +296,7 @@ class BarangModel extends \App\Models\BaseModel
 						}elseif ($val!=1){
 							$data_db = [
 								'id_barang' => $id_barang, 
-								'harga' => str_replace('.', '', $_POST['adjusment_harga_pokok']), 
+								'harga' => str_replace('.', '', $_POST['harga_pokok']), 
 								'jenis' => 'harga_pokok', 
 								'tgl_input' => date('Y-m-d H:i:s'), 
 								'id_user_input' => $_SESSION['user']['id_user']
@@ -329,6 +329,74 @@ class BarangModel extends \App\Models\BaseModel
 			
 		}
 		
+		// Coding for add history addjustment barang ====================================================================================================================
+		
+		// add to history stock
+		$data_db = [];
+		foreach ($_POST['adjusment'] as $index => $val) {
+			if (!$val)
+				continue;
+		
+			$val = str_replace('.', '', $val);
+			if ($val != 0) {
+				$data_db[] = [
+					'id_barang' => $id_barang,
+					'id_gudang' => $_POST['id_gudang'][$index],
+					'stock_awal' => $_POST['stock_awal'][$index],
+					'adjusment_stok' => $val,
+					'stock_akhir' => $_POST['stock_awal'][$index] + $val,
+					'tgl_input' => date('Y-m-d H:i:s'),
+					'id_user_input' => $_SESSION['user']['id_user']
+				];
+			}
+		}
+
+		if ($data_db) {
+			$this->db->table('barang_history_stok')->insertBatch($data_db);
+		}
+
+		// add to history harga Pokok
+		if ($_POST['adjusment_harga_pokok']) {
+			$val = str_replace('.', '',  $_POST['harga_pokok']);
+			if ($val!=1){
+				$data_db = [
+					'id_barang' => $id_barang, 
+					'harga_awal' => str_replace('.', '', $_POST['harga_pokok_awal']), 
+					'harga_adjustment' => str_replace('.', '', $_POST['adjusment_harga_pokok']), 
+					'harga_akhir' => str_replace('.', '', $_POST['harga_pokok']),
+					'jenis' => 'harga_pokok', 
+					'tgl_input' => date('Y-m-d H:i:s'), 
+					'id_user_input' => $_SESSION['user']['id_user']
+				];
+				$this->db->table('barang_history_harga')->insert($data_db);
+			}
+		}
+			
+		// add history harga jual
+		$data_db = [];
+		foreach ($_POST['harga_jual'] as $index => $val) 
+		{
+			$val = str_replace('.', '', $val);
+			// if ($val != $_POST['harga_awal'][$index]) {
+				$data_db[] = [
+								'id_barang' => $id_barang, 
+								'id_jenis_harga' => $_POST['id_jenis_harga'][$index], 
+								// 'harga' => $val, 
+								'harga_awal' => str_replace('.', '', $_POST['harga_awal'][$index]), 
+								'harga_adjustment' => $val - str_replace('.', '', $_POST['harga_awal'][$index]),
+								'harga_akhir' => $val,
+								'jenis' => 'harga_jual', 
+								'tgl_input' => date('Y-m-d H:i:s'), 
+								'id_user_input' => $_SESSION['user']['id_user']
+							];
+			// }
+		}
+		if ($data_db) {
+			$this->db->table('barang_history_harga')->insertBatch($data_db);
+		}
+
+		// ==============================================================================================================================================================
+
 		$this->db->transComplete();
 		if ($this->db->transStatus()) {
 			$result['status'] = 'ok';
@@ -338,7 +406,7 @@ class BarangModel extends \App\Models\BaseModel
 			$result['status'] = 'error';
 			$result['message'] = 'Data gagal disimpan';
 		}
-		
+
 		return $result;
 	}
 	

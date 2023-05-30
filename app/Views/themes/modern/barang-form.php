@@ -182,6 +182,7 @@ if (@$_GET['mobile'] == 'true') {
 								</div>
 								<input type="hidden" name="id_gudang[]" value="<?=$val['id_gudang']?>"/>
 								<input type="hidden" name="adjusment[]" value="0"/>
+								<input type="hidden" name="stock_awal[]" value="<?=$total_stok?>">
 							</div>
 						</div>
 					</div>
@@ -204,6 +205,7 @@ if (@$_GET['mobile'] == 'true') {
 						Harga awal: <span class="harga-pokok-awal"><?=format_ribuan($harga_pokok)?></span>, Adjusment: <span class="adjusment-harga-pokok">0</span>
 					</div>
 					<input type="hidden" name="adjusment_harga_pokok" value="0"/>
+					<input type="hidden" name="harga_pokok_awal" value="<?=$harga_pokok?>">
 				</div>
 			</div>
 			
