@@ -189,6 +189,7 @@ class User extends \App\Controllers\BaseController
 	}
 	
 	public function setData() {
+		$this->data['gudang'] = $this->model->getgudang();
 		$this->data['roles'] = $this->model->getRoles();
 		$this->data['user_permission'] = $this->userPermission;
 		$this->data['list_module'] = $this->model->getListModules();
