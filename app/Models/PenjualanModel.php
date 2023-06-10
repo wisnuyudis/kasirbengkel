@@ -1,21 +1,23 @@
 <?php
+
 /**
-*	App Name	: Aplikasi Kasir Berbasis Web	
-*	Developed by: Agus Prawoto Hadi
-*	Website		: https://jagowebdev.com
-*	Year		: 2022
-*/
+ *	App Name	: Aplikasi Kasir Berbasis Web	
+ *	Developed by: Agus Prawoto Hadi
+ *	Website		: https://jagowebdev.com
+ *	Year		: 2022
+ */
 
 namespace App\Models;
 
 class PenjualanModel extends \App\Models\BaseModel
 {
 
-	public function __construct() {
+	public function __construct()
+	{
 		parent::__construct();
 	}
-	
-	public function deleteData($id) 
+
+	public function deleteData($id)
 	{
 		$this->db->transStart();
 		$this->db->table('penjualan')->delete(['id_penjualan' => $id]);
@@ -24,8 +26,9 @@ class PenjualanModel extends \App\Models\BaseModel
 		$this->db->transComplete();
 		return $this->db->transStatus();
 	}
-	
-	public function getIdentitas() {
+
+	public function getIdentitas()
+	{
 		$sql = 'SELECT * FROM identitas 
 				LEFT JOIN wilayah_kelurahan USING(id_wilayah_kelurahan)
 				LEFT JOIN wilayah_kecamatan USING(id_wilayah_kecamatan)
@@ -33,12 +36,13 @@ class PenjualanModel extends \App\Models\BaseModel
 				LEFT JOIN wilayah_propinsi USING(id_wilayah_propinsi)';
 		return $this->db->query($sql)->getRowArray();
 	}
-	
-	public function getBarangByBarcode($code, $id_gudang, $id_jenis_harga) {
-		
+
+	public function getBarangByBarcode($code, $id_gudang, $id_jenis_harga)
+	{
+
 		$sql = 'SELECT id_barang FROM barang WHERE barcode = ?';
 		$id_barang = $this->db->query($sql, $code)->getRowArray()['id_barang'];
-		
+
 		$sql = 'SELECT *, (
 					SELECT harga 
 					FROM barang_harga
@@ -88,41 +92,42 @@ class PenjualanModel extends \App\Models\BaseModel
 					GROUP BY id_barang, id_gudang
 					
 				) AS detail USING(id_barang) WHERE id_barang = ' . $id_barang;
-				
+
 		$result = $this->db->query($sql, trim($code))->getRowArray();
 		return $result;
 	}
-	
-	public function getPenjualanById($id) {
-		
+
+	public function getPenjualanById($id)
+	{
+
 		$sql = 'SELECT * FROM penjualan LEFT JOIN customer USING(id_customer) WHERE id_penjualan = ?';
 		$result = $this->db->query($sql, $id)->getRowArray();
 		return $result;
 	}
-	
-	public function getPenjualanBarangByIdPenjualan($id) 
+
+	public function getPenjualanBarangByIdPenjualan($id)
 	{
 		$sql = 'SELECT *
 				FROM penjualan_detail 
 				LEFT JOIN barang USING(id_barang)
 				WHERE id_penjualan = ?';
-				
+
 		$result = $this->db->query($sql, $id)->getResultArray();
-		
+
 		$data = [];
 		foreach ($result as $val) {
 			$data[$val['id_barang']] = $val;
 		}
-		
+
 		// List stok
 		$id_barang = [];
 		foreach ($data as $val) {
 			$id_barang[] = $val['id_barang'];
 		}
-		
+
 		$list_stok = $this->getListStokByIdBarang($id_barang);
 		$list_harga = $this->getListHargaBarang($id_barang);
-		
+
 		// Merge
 		foreach ($data as &$val) {
 			if (key_exists($val['id_barang'], $list_stok)) {
@@ -130,64 +135,69 @@ class PenjualanModel extends \App\Models\BaseModel
 			} else {
 				$val['list_stok'][$val['id_barang']] = 0;
 			}
-			
+
 			if (key_exists($val['id_barang'], $list_harga)) {
 				$val['list_harga'] = $list_harga[$val['id_barang']];
 			} else {
 				$val['list_harga'] = 0;
 			}
-			
+
 			// $val['list_stok'] = $list_stok[$val['id_barang']];
 			// $val['list_harga'] = $list_harga[$val['id_barang']];
 		}
-		
+
 		return $data;
 	}
-	
-	public function getPembayaranByIdPenjualan($id) {
+
+	public function getPembayaranByIdPenjualan($id)
+	{
 		$sql = 'SELECT *
 				FROM penjualan_bayar 
 				WHERE id_penjualan = ?';
-				
+
 		$result = $this->db->query($sql, $id)->getResultArray();
 		return $result;
 	}
-	
-	public function getAllGudang() {
+
+	public function getAllGudang()
+	{
 		$sql = 'SELECT * FROM gudang';
 		$result = $this->db->query($sql)->getResultArray();
 		return $result;
 	}
-	
-	public function getJenisHarga() {
+
+	public function getJenisHarga()
+	{
 		$sql = 'SELECT * FROM jenis_harga';
 		$result = $this->db->query($sql)->getResultArray();
 		return $result;
 	}
-	
-	public function getPenjualanDetail($id_penjualan) 
+
+	public function getPenjualanDetail($id_penjualan)
 	{
 		// Order
-		$result['order'] = $this->db->query('SELECT * 
+		$result['order'] = $this->db->query(
+			'SELECT * 
 									FROM penjualan
-									WHERE id_penjualan = ?' 
-									, $id_penjualan
-								)
-							->getRowArray();
-		
+									WHERE id_penjualan = ?',
+			$id_penjualan
+		)
+			->getRowArray();
+
 		if (!$result['order']) {
 			return false;
 		}
-		
+
 		// Produk
-		$result['detail'] = $this->db->query('SELECT * 
+		$result['detail'] = $this->db->query(
+			'SELECT * 
 									FROM `penjualan_detail`
 									LEFT JOIN barang USING(id_barang)
-									WHERE id_penjualan = ?' 
-									, $id_penjualan
-								)
-							->getResultArray();
-		
+									WHERE id_penjualan = ?',
+			$id_penjualan
+		)
+			->getResultArray();
+
 		// Customer
 		$data = [];
 		if ($result['order']['id_customer']) {
@@ -200,37 +210,35 @@ class PenjualanModel extends \App\Models\BaseModel
 		} else {
 			$result['customer'] = ['nama_customer' => 'Umum', 'alamat_customer' => '-'];
 		}
-		
+
 		// Bayar
 		$data = [];
 		if ($result['order']) {
 			$sql = 'SELECT * FROM penjualan_bayar WHERE id_penjualan = ' . $id_penjualan;
 			$result['bayar'] = $this->db->query($sql)->getResultArray();
-			
 		}
 
 		return $result;
 	}
-	
-	public function saveData() 
-	{	
+
+	public function saveData()
+	{
 		// barang
 		$sub_total = 0;
 		$total_diskon_item = 0;
 		$total_qty = 0;
 		$total_untung_rugi = 0;
 		$total_harga_pokok = 0;
-		
+
 		// echo '<pre>'; print_r($_POST); die;
 		$data_db_barang = [];
-		foreach ($_POST['id_barang'] as $key => $id_barang) 
-		{
+		foreach ($_POST['id_barang'] as $key => $id_barang) {
 			$sql = 'SELECT * FROM barang LEFT JOIN satuan_unit USING(id_satuan_unit) WHERE id_barang = ?';
 			$query_barang = $this->db->query($sql, $id_barang)->getRowArray();
 			$harga_satuan = str_replace(['.'], '', $_POST['harga_satuan'][$key]);
 			$qty = str_replace(['.'], '', $_POST['qty'][$key]);
 			$harga_barang =  $harga_satuan * $qty;
-						
+
 			$diskon_nilai = str_replace(['.'], '', $_POST['diskon_barang_nilai'][$key]);
 			$diskon_jenis = $_POST['diskon_barang_jenis'][$key];
 			$diskon_harga = 0;
@@ -239,16 +247,16 @@ class PenjualanModel extends \App\Models\BaseModel
 				if ($diskon_jenis == '%') {
 					$diskon_harga = round($harga_barang * $diskon_nilai / 100);
 				}
-				
+
 				$harga_barang = $harga_barang - $diskon_harga;
 				$total_diskon_item += $diskon_harga;
 			}
 			$total_qty += $qty;
-			
+
 			$untung_rugi = $harga_barang - $_POST['harga_pokok'][$key] * $qty;
 			$total_untung_rugi += $untung_rugi;
 			$total_harga_pokok += $_POST['harga_pokok'][$key] *  $qty;
-			
+
 			$data_db_barang[$key]['id_barang'] = $id_barang;
 			$data_db_barang[$key]['qty'] = $_POST['qty'][$key];
 			$data_db_barang[$key]['satuan'] = $query_barang['satuan'];
@@ -261,14 +269,14 @@ class PenjualanModel extends \App\Models\BaseModel
 			$data_db_barang[$key]['harga_neto'] = $harga_barang;
 			$data_db_barang[$key]['harga_pokok_total'] = $_POST['harga_pokok'][$key] * $qty;
 			$data_db_barang[$key]['untung_rugi'] = $untung_rugi;
-			
+
 			$sub_total += $harga_barang;
 		}
-		
+
 		$this->db->transStart();
-		
+
 		// Save table penjualan
-		
+
 		$data_db['id_customer'] = null;
 		if ($_POST['id_customer']) {
 			$data_db['id_customer'] = $_POST['id_customer'];
@@ -281,43 +289,41 @@ class PenjualanModel extends \App\Models\BaseModel
 		$data_db['jenis_bayar'] = $_POST['jenis_bayar'];
 		$data_db['harga_pokok'] = $total_harga_pokok;
 		$data_db['untung_rugi'] = $total_untung_rugi;
-		
+
 		// Invoice
 		$sql = 'LOCK TABLES penjualan WRITE, setting WRITE, penjualan_detail WRITE, penjualan_bayar WRITE';
 		$this->db->query($sql);
-		
-		if (empty($_POST['id'])) 
-		{
+
+		if (empty($_POST['id'])) {
 			$sql = 'SELECT * FROM setting WHERE type="invoice"';
 			$result = $this->db->query($sql)->getResultArray();
 			foreach ($result as $val) {
 				if ($val['param'] == 'no_invoice') {
 					$pola_no_invoice = $val['value'];
 				}
-				
+
 				if ($val['param'] == 'jml_digit') {
 					$jml_digit = $val['value'];
 				}
 			}
-			
+
 			$sql = 'SELECT MAX(no_squence) AS value FROM penjualan WHERE tgl_invoice LIKE "' . date('Y') . '%"';
 			$result = $this->db->query($sql)->getRowArray();
 			$no_squence = $result['value'] + 1;
 			$no_invoice = str_pad($no_squence, $jml_digit, "0", STR_PAD_LEFT);
 			$no_invoice = str_replace('{{nomor}}', $no_invoice, $pola_no_invoice);
 			$no_invoice = str_replace('{{tahun}}', date('Y'), $no_invoice);
-			$data_db['no_invoice'] = $no_invoice;
+			$data_db['no_invoice'] = str_pad($_SESSION['user']['id_user'], 3, 0, STR_PAD_LEFT) . '-' . $no_invoice;
 			$data_db['no_squence'] = $no_squence;
 			$data_db['tgl_invoice'] = date('Y-m-d');
 			$data_db['tgl_penjualan'] = date('Y-m-d H:i:s');
-			
 		} else {
 			$exp = explode('-', $_POST['tgl_invoice']);
 			$data_db['tgl_invoice'] = $exp[2] . '-' . $exp[1] . '-' . $exp[0];
 		}
-		
+
 		//-- Invoice
-				
+
 		$diskon_total_jenis = $_POST['diskon_total_jenis'];
 		$diskon_total_nilai = str_replace(['.'], '', $_POST['diskon_total_nilai']);
 		$diskon = 0;
@@ -330,43 +336,41 @@ class PenjualanModel extends \App\Models\BaseModel
 				$diskon = $diskon_total_nilai;
 			}
 		}
-				
+
 		$data_db['diskon'] = $diskon;
 		$data_db['total_diskon'] = $total_diskon_item + $diskon;
 		$data_db['diskon_jenis'] = $diskon_total_jenis;
 		$data_db['diskon_nilai'] = $diskon_total_nilai;
-		
+
 		$data_db['penyesuaian'] = str_replace('.', '', $_POST['penyesuaian_nilai']);
 		$neto = $sub_total + $data_db['penyesuaian'];
 		if ($neto < 0) {
 			$neto = 0;
 		}
-		
+
 		// Pajak
 		$data_db['pajak_persen'] = $data_db['pajak_nilai'] = 0;
 		$data_db['pajak_display_text'] = null;
-		if (!empty($_POST['pajak_nilai'])) 
-		{
+		if (!empty($_POST['pajak_nilai'])) {
 			$setting = $this->getSetting('pajak');
 			foreach ($setting as $val) {
 				$pajak_setting[$val['param']] = $val['value'];
 			}
-				
-			$pajak = round( $neto * $_POST['pajak_nilai'] / 100 );
+
+			$pajak = round($neto * $_POST['pajak_nilai'] / 100);
 			$neto = $neto + $pajak;
 			$data_db['pajak_display_text'] = $pajak_setting['display_text'];
 			$data_db['pajak_persen'] = $_POST['pajak_nilai'];
 			$data_db['pajak_nilai'] = $pajak;
 		}
 		$data_db['neto'] = $neto;
-		
-		
+
+
 		$total_bayar = 0;
-		foreach ($_POST['jml_bayar'] as $key => $val) 
-		{
+		foreach ($_POST['jml_bayar'] as $key => $val) {
 			$total_bayar += (int) str_replace('.', '', $val);
 		}
-		
+
 		$data_db['total_bayar'] = $total_bayar;
 		$data_db['kurang_bayar'] = $neto - $total_bayar;
 		$data_db['kembali'] = 0;
@@ -374,15 +378,14 @@ class PenjualanModel extends \App\Models\BaseModel
 		if ($total_bayar >= $neto) {
 			$status = 'lunas';
 			$data_db['kembali'] = $total_bayar - $neto;
-		}  else {
+		} else {
 			$status = 'kurang_bayar';
 		}
-		
+
 		$data_db['status'] = $status;
-		
+
 		// Save table penjualan_barang, penjualan_layanan		
-		if (!empty($_POST['id']))  
-		{
+		if (!empty($_POST['id'])) {
 			$data_db['id_user_update'] = $_SESSION['user']['id_user'];
 			$data_db['tgl_update'] = date('Y-m-d H:i:s');
 			$query = $this->db->table('penjualan')->update($data_db, ['id_penjualan' => $_POST['id']]);
@@ -394,118 +397,90 @@ class PenjualanModel extends \App\Models\BaseModel
 			$query = $this->db->table('penjualan')->insert($data_db);
 			$id_penjualan = $this->db->insertID();
 		}
-		
+
 		// Save tabel penjualan_bayar
-		if ($total_bayar) 
-		{
-			foreach ($_POST['jml_bayar'] as $key => $val) 
-			{
+		if ($total_bayar) {
+			foreach ($_POST['jml_bayar'] as $key => $val) {
 				$data_db_bayar[$key]['id_penjualan'] = $id_penjualan;
 				$data_db_bayar[$key]['jml_bayar'] = str_replace('.', '', $val);
 				$data_db_bayar[$key]['tgl_bayar'] = format_datedb($_POST['tgl_bayar'][$key]);
 			}
 			$this->db->table('penjualan_bayar')->insertBatch($data_db_bayar);
 		}
-		
+
 		// Save tabel penjualan_detail
 		foreach ($data_db_barang as &$val) {
 			$val['id_penjualan'] = $id_penjualan;
 		}
-		
+
 		$sql = 'UNLOCK TABLES';
 		$this->db->query($sql);
-		
+
 		$this->db->table('penjualan_detail')->insertBatch($data_db_barang);
-		
+
 		$this->db->transComplete();
-		
-		if ($this->db->transStatus() === false ) {
+
+		if ($this->db->transStatus() === false) {
 			$result['status'] = 'error';
 			$result['message'] = 'Data gagal disimpan';
 		} else {
 			$sql = 'SELECT * FROM penjualan WHERE id_penjualan = ?';
 			$data = $this->db->query($sql, $id_penjualan)->getRowArray();
-			
+
 			$result['status'] = 'ok';
 			$result['message'] = 'Data berhasil disimpan';
 			$result['id_penjualan'] = $id_penjualan;
 			$result['penjualan'] = $data;
 			$result['no_invoice'] = $data['no_invoice'];
-			
+
 			$result['customer'] = ['email' => ''];
 			if (!empty($_POST['id_customer'])) {
 				$sql = 'SELECT * FROM customer WHERE id_customer = ?';
 				$result['customer'] = $this->db->query($sql, $_POST['id_customer'])->getRowArray();
 			}
 		}
-		
+
 		return $result;
 	}
 
 	// Penjualan
-	public function countAllDataPenjualan() {
+	public function countAllDataPenjualan()
+	{
 		$sql = 'SELECT COUNT(*) AS jml FROM penjualan AS tabel';
 		$result = $this->db->query($sql)->getRow();
 		return $result->jml;
 	}
-	
-	public function countAllDataPenjualanCust() {
-		$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer)';
-		$result = $this->db->query($sql)->getRow();
-		return $result->jml;
-	}
-	
 
-	public function countAllDataPenjualanCustDate($startDate,$endDate) {
-		$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'"';
-		$result = $this->db->query($sql)->getRow();
-		return $result->jml;
-	}
-
-	public function countAllDataPenjualanDetail($id,$startDate,$endDate) {
-		if($id == null && $startDate == null && $endDate == null){
-			$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE customer.id_customer IS NULL';
-		} else if ($id == null){
-			$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE customer.id_customer IS NULL AND tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'"';
-		} else if($startDate == null && $endDate == null){
-			$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE customer.id_customer LIKE ' .$id;
-		} else {
-			$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan AS tabel LEFT JOIN customer USING(id_customer) WHERE customer.id_customer LIKE ' .$id. 'AND tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'"';
-		}
-		$result = $this->db->query($sql)->getRow();
-		return $result->jml;
-	}
-
-	public function getListDataPenjualan() 
+	public function getListDataPenjualan()
 	{
 
 		$columns = $this->request->getPost('columns');
 
 		// Search
 		$search_all1 = @$this->request->getPost('search')['value'];
-		$search_all = str_replace(' ','%',$search_all1);
+		$search_all = str_replace(' ', '%', $search_all1);
 		$where = ' WHERE 1=1 ';
 		if ($search_all) {
 			foreach ($columns as $val) {
-				
-				if (strpos($val['data'], 'ignore_search') !== false) 
+
+				if (strpos($val['data'], 'ignore_search') !== false)
 					continue;
-				
+
 				if (strpos($val['data'], 'ignore') !== false)
 					continue;
-				
+
 				$where_col[] = $val['data'] . ' LIKE "%' . $search_all . '%"';
 			}
-			 $where .= ' AND (' . join(' OR ', $where_col) . ') ';
+			$where .= ' AND (' . join(' OR ', $where_col) . ') ';
 		}
-		
+
 		// Query Total Filtered
 		$sql = 'SELECT COUNT(*) AS jml FROM penjualan 
 				LEFT JOIN customer USING(id_customer)
 				' . $where;
 		$data = $this->db->query($sql)->getRowArray();
 		$total_filtered = $data['jml'];
-		
+
 		// Order
 		$order_data = $this->request->getPost('order');
 		$order = '';
@@ -516,218 +491,82 @@ class PenjualanModel extends \App\Models\BaseModel
 
 		$start = $this->request->getPost('start') ?: 0;
 		$length = $this->request->getPost('length') ?: 10;
-		
+
 		// Query Data
 		$sql = 'SELECT * FROM penjualan 
 				LEFT JOIN customer USING(id_customer)
 				' . $where . $order . ' LIMIT ' . $start . ', ' . $length;
 		$data = $this->db->query($sql)->getResultArray();
-	
+
 		return ['data' => $data, 'total_filtered' => $total_filtered];
 	}
 
-	public function getListDataPenjualanCustDetail($id,$startDate,$endDate) 
-	{
-
-		$columns = $this->request->getPost('columns');
-
-		// Search
-		$search_all1 = @$this->request->getPost('search')['value'];
-		$search_all = str_replace(' ','%',$search_all1);
-		if ($id == NULL && $startDate == '' && $endDate == ''){
-			$where = 'WHERE id_customer IS NULL'; 
-		} else if ($id == null){
-			$where = 'WHERE id_customer IS NULL AND tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'" ';
-		} else if ($startDate == '' && $endDate == ''){
-			$where = 'WHERE id_customer LIKE '.$id;
-		} else {
-			$where = 'WHERE id_customer LIKE '.$id.' AND tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'" ';
-		}
-		
-		if ($search_all) {
-			foreach ($columns as $val) {
-				
-				if (strpos($val['data'], 'ignore_search') !== false) 
-					continue;
-				
-				if (strpos($val['data'], 'ignore') !== false)
-					continue;
-				
-				$where_col[] = $val['data'] . ' LIKE "%' . $search_all . '%"';
-			}
-			 $where .= ' AND (' . join(' OR ', $where_col) . ') ';
-		}
-		
-		// Query Total Filtered
-		$sql = 'SELECT COUNT(*) AS jml FROM penjualan 
-				LEFT JOIN customer USING(id_customer)
-				' . $where;
-		$data = $this->db->query($sql)->getRowArray();
-		$total_filtered = $data['jml'];
-		
-		// Order
-		$order_data = $this->request->getPost('order');
-		$order = '';
-		if (strpos($_POST['columns'][$order_data[0]['column']]['data'], 'ignore_search') === false) {
-			$order_by = $columns[$order_data[0]['column']]['data'] . ' ' . strtoupper($order_data[0]['dir']);
-			$order = ' ORDER BY ' . $order_by;
-		}
-
-		$start = $this->request->getPost('start') ?: 0;
-		$length = $this->request->getPost('length') ?: 10;
-		
-		// Query Data
-		$sql = 'SELECT * FROM penjualan 
-				LEFT JOIN customer USING(id_customer)
-				' . $where . $order . ' LIMIT ' . $start . ', ' . $length;
-		$data = $this->db->query($sql)->getResultArray();
-	
-		return ['data' => $data, 'total_filtered' => $total_filtered];
-	}
-
-	public function getListDataPenjualanCust() 
-	{
-
-		$columns = $this->request->getPost('columns');
-
-		// Search
-		$search_all1 = @$this->request->getPost('search')['value'];
-		$search_all = str_replace(' ','%',$search_all1);
-		$where = ' WHERE 1=1 ';
-		if ($search_all) {
-			foreach ($columns as $val) {
-				
-				if (strpos($val['data'], 'ignore_search') !== false) 
-					continue;
-				
-				if (strpos($val['data'], 'ignore') !== false)
-					continue;
-				
-				$where_col[] = $val['data'] . ' LIKE "%' . $search_all . '%"';
-			}
-			 $where .= ' AND (' . join(' OR ', $where_col) . ') ';
-		}
-		
-		// Query Total Filtered
-		$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan 
-				LEFT JOIN customer USING(id_customer)
-				' . $where ;
-		$data = $this->db->query($sql)->getRowArray();
-		$total_filtered = $data['jml'] + 1;
-		
-		// Order
-		$order_data = $this->request->getPost('order');
-		$order = '';
-		if (strpos($_POST['columns'][$order_data[0]['column']]['data'], 'ignore_search') === false) {
-			$order_by = $columns[$order_data[0]['column']]['data'] . ' ' . strtoupper($order_data[0]['dir']);
-			$order = ' ORDER BY ' . $order_by;
-		}
-
-		$start = $this->request->getPost('start') ?: 0;
-		$length = $this->request->getPost('length') ?: 10;
-		
-		// Query Data
-		$sql = 'SELECT * FROM penjualan 
-				LEFT JOIN customer USING(id_customer)
-				' . $where .' GROUP BY customer.nama_customer LIMIT ' . $start . ', ' . $length;
-		$data = $this->db->query($sql)->getResultArray();
-	
-		return ['data' => $data, 'total_filtered' => $total_filtered];
-	}
-
-	public function getCustomer($id){
-		$sql = 'SELECT nama_customer FROM customer WHERE id_customer = "'.$id.'"';
-		$result = $this->db->query($sql)->getRow();
-		return $result;
-	}
-
-	public function getListDataPenjualanCustDate($startDate,$endDate) 
-	{
-
-		$columns = $this->request->getPost('columns');
-
-		// Search
-		$search_all1 = @$this->request->getPost('search')['value'];
-		$search_all = str_replace(' ','%',$search_all1);
-		$where = 'WHERE tgl_penjualan BETWEEN "'.$startDate.'" AND "'.$endDate.'" ';
-		if ($search_all) {
-			foreach ($columns as $val) {
-				
-				if (strpos($val['data'], 'ignore_search') !== false) 
-					continue;
-				
-				if (strpos($val['data'], 'ignore') !== false)
-					continue;
-				
-				$where_col[] = $val['data'] . ' LIKE "%' . $search_all . '%"';
-			}
-			 $where .= ' AND (' . join(' OR ', $where_col) . ') ';
-		}
-		
-		// Query Total Filtered
-		$sql = 'SELECT COUNT(DISTINCT customer.id_customer) AS jml FROM penjualan 
-				LEFT JOIN customer USING(id_customer)
-				' . $where ;
-		$data = $this->db->query($sql)->getRowArray();
-		$total_filtered = $data['jml'] + 1;
-		
-		// Order
-		$order_data = $this->request->getPost('order');
-		$order = '';
-		if (strpos($_POST['columns'][$order_data[0]['column']]['data'], 'ignore_search') === false) {
-			$order_by = $columns[$order_data[0]['column']]['data'] . ' ' . strtoupper($order_data[0]['dir']);
-			$order = ' ORDER BY ' . $order_by;
-		}
-
-		$start = $this->request->getPost('start') ?: 0;
-		$length = $this->request->getPost('length') ?: 10;
-		
-		// Query Data
-		$sql = 'SELECT * FROM penjualan 
-				LEFT JOIN customer USING(id_customer)
-				' . $where .' GROUP BY customer.nama_customer LIMIT ' . $start . ', ' . $length;
-		$data = $this->db->query($sql)->getResultArray();
-	
-		return ['data' => $data, 'total_filtered' => $total_filtered];
-	}
-	
 	// List Customer
-	public function countAllDataCustomer() {
-		$sql = 'SELECT COUNT(*) AS jml FROM customer';
+	public function countAllDataCustomer()
+	{
+		$cekrole = $this->cekrole();
+		if ($cekrole['nama_role'] == 'kasir') {
+			$whereidsales = " and id_sales=" . $cekrole['id_user'] . " ";
+		} else {
+			$whereidsales = "";
+		}
+
+		$where = ' WHERE 1 = 1 ' . $whereidsales;
+
+		$sql = 'SELECT COUNT(*) AS jml FROM customer ' . $where;
 		$result = $this->db->query($sql)->getRow();
 		return $result->jml;
 	}
-	
-	public function getListDataCustomer() {
+
+	function cekrole()
+	{
+		$data = $this->db->query('select a.id_user, b.id_role, c.nama_role, a.id_gudang from user a 
+		left join user_role b on b.id_user=a.id_user
+		left join role c on c.id_role=b.id_role where a.id_user=' . $_SESSION['user']['id_user'])->getRowArray();
+		return $data;
+	}
+
+	public function getListDataCustomer()
+	{
+
+		$cekrole = $this->cekrole();
+		if ($cekrole['nama_role'] == 'kasir') {
+			$whereidsales = " and id_sales=" . $cekrole['id_user'] . " ";
+		} else {
+			$whereidsales = "";
+		}
+
+		if ($_SESSION['user']['id_user']) {
+		}
 
 		$columns = $this->request->getPost('columns');
 
 		// Search
 		$search_all1 = @$this->request->getPost('search')['value'];
-		$search_all = str_replace(' ','%',$search_all1);
-		
-		$where = ' WHERE 1 = 1 ';
+		$search_all = str_replace(' ', '%', $search_all1);
+
+		$where = ' WHERE 1 = 1 ' . $whereidsales;
 		if ($search_all) {
 			foreach ($columns as $val) {
-				
-				if (strpos($val['data'], 'ignore_search') !== false) 
+
+				if (strpos($val['data'], 'ignore_search') !== false)
 					continue;
-				
+
 				if (strpos($val['data'], 'ignore') !== false)
 					continue;
-				
+
 				$where_col[] = $val['data'] . ' LIKE "%' . $search_all . '%"';
 			}
-			 $where .= ' AND (' . join(' OR ', $where_col) . ') ';
+			$where .= ' AND (' . join(' OR ', $where_col) . ') ';
 		}
-		
+
 		// Order
 		$start = $this->request->getPost('start') ?: 0;
 		$length = $this->request->getPost('length') ?: 10;
-		
+
 		$order_data = $this->request->getPost('order');
 		$order = '';
-		
+
 		if (!empty($_POST) && strpos($_POST['columns'][$order_data[0]['column']]['data'], 'ignore_search') === false) {
 			$order_by = $columns[$order_data[0]['column']]['data'] . ' ' . strtoupper($order_data[0]['dir']);
 			$order = 'ORDER BY ' . $order_by . ' LIMIT ' . $start . ', ' . $length;
@@ -740,62 +579,64 @@ class PenjualanModel extends \App\Models\BaseModel
 				LEFT JOIN wilayah_kabupaten USING(id_wilayah_kabupaten)
 				LEFT JOIN wilayah_propinsi USING(id_wilayah_propinsi)
 				' . $where;
-				
+
 		$query = $this->db->query($sql)->getRowArray();
 		$total_filtered = $query['jml_data'];
-							
-		
+
+
 		// Query Data
 		$sql = 'SELECT * FROM customer 
 				LEFT JOIN wilayah_kelurahan USING(id_wilayah_kelurahan) 
 				LEFT JOIN wilayah_kecamatan USING(id_wilayah_kecamatan)
 				LEFT JOIN wilayah_kabupaten USING(id_wilayah_kabupaten)
 				LEFT JOIN wilayah_propinsi USING(id_wilayah_propinsi)
+				LEFT JOIN user b on b.id_user=customer.id_sales
 				' . $where . $order;
-		
+
 		$data = $this->db->query($sql)->getResultArray();
-				
+
 		return ['data' => $data, 'total_filtered' => $total_filtered];
 	}
-	
+
 	// List Barang
-	public function countAllDataBarang() {
+	public function countAllDataBarang()
+	{
 		$sql = 'SELECT COUNT(*) AS jml FROM barang ';
 		$result = $this->db->query($sql)->getRow();
 		return $result->jml;
 	}
-	
-	public function getListDataBarang( $id_gudang, $id_jenis_harga ) {
+
+	public function getListDataBarang($id_gudang, $id_jenis_harga)
+	{
 
 		$columns = $this->request->getPost('columns');
 
 		// Search
 		$search_all1 = @$this->request->getPost('search')['value'];
-		$search_all = str_replace(' ','%',$search_all1);
+		$search_all = str_replace(' ', '%', $search_all1);
 		$where = ' WHERE 1 = 1 ';
 		if ($search_all) {
 			// Additional Search
 			foreach ($columns as $val) {
-				
-				if (strpos($val['data'], 'ignore_search') !== false) 
+
+				if (strpos($val['data'], 'ignore_search') !== false)
 					continue;
-				
+
 				if (strpos($val['data'], 'ignore') !== false)
 					continue;
-				
+
 				$where_col[] = $val['data'] . ' LIKE "%' . $search_all . '%"';
 			}
-			 $where .= ' AND (' . join(' OR ', $where_col) . ') ';
-			
+			$where .= ' AND (' . join(' OR ', $where_col) . ') ';
+
 			$list_columns = ['barcode', 'kode_Barang'];
 			$where_col = [];
 			foreach ($list_columns as $column) {
 				$where_col[] = $column . ' = "' . $search_all . '"';
 			}
 			$where .= ' OR (' . join(' OR ', $where_col) . ') ';
-			 
 		}
-		
+
 		// Order		
 		$order_data = $this->request->getPost('order');
 		$order = '';
@@ -816,11 +657,11 @@ class PenjualanModel extends \App\Models\BaseModel
 					WHERE id_gudang = ' . $id_gudang . '
 					GROUP BY id_barang
 				) AS detail USING(id_barang)' . $where;
-				
+
 		$result = $this->db->query($sql)->getRowArray();
 		$total_filtered = $result['jml'];
-		
-		
+
+
 		// Query Data
 		$start = $this->request->getPost('start') ?: 0;
 		$length = $this->request->getPost('length') ?: 10;
@@ -874,32 +715,33 @@ class PenjualanModel extends \App\Models\BaseModel
 					
 				) AS detail USING(id_barang)' . $where . $order . ' LIMIT ' . $start . ', ' . $length;
 		$data = $this->db->query($sql)->getResultArray();
-		
+
 		// List stok
 		$id_barang = [];
 		foreach ($data as $val) {
 			$id_barang[] = $val['id_barang'];
 		}
-		
+
 		if ($id_barang) {
 			$list_stok = $this->getListStokByIdBarang($id_barang);
 			$list_harga = $this->getListHargaBarang($id_barang);
-			
+
 			// Merge
 			foreach ($data as &$val) {
 				$val['list_stok'] = key_exists($val['id_barang'], $list_stok) ? $list_stok[$val['id_barang']] : 0;
 				$val['list_harga'] = key_exists($val['id_barang'], $list_harga) ? $list_harga[$val['id_barang']] : 0;
 			}
 		}
-				
+
 		return ['data' => $data, 'total_filtered' => $total_filtered];
 	}
-	
-	private function getListHargaBarang($id_barang) {
-		
+
+	private function getListHargaBarang($id_barang)
+	{
+
 		if (!$id_barang)
 			return;
-		
+
 		$sql = 'SELECT * FROM jenis_harga';
 		$result = $this->db->query($sql)->getResultArray();
 		$list_harga = [];
@@ -915,23 +757,24 @@ class PenjualanModel extends \App\Models\BaseModel
 				FROM barang
 				WHERE id_barang IN(' . join(',', $id_barang) . ')';
 			$result_harga = $this->db->query($sql)->getResultArray();
-			
+
 			foreach ($result_harga as $val_harga) {
 				$list_harga[$val_harga['id_barang']][$val['id_jenis_harga']] = $val_harga['harga_jual'];
 			}
 		}
-		
+
 		return $list_harga;
 	}
-	
-	private function getListStokByIdBarang($id_barang) {
-		
+
+	private function getListStokByIdBarang($id_barang)
+	{
+
 		// print_r( $id_barang ); die;
 		if (!$id_barang)
 			return;
-		
+
 		$list_id_barang = join(',', $id_barang);
-		
+
 		$sql = 'SELECT *, SUM(saldo_stok) AS stok FROM (
 					SELECT id_barang, id_gudang, adjusment_stok AS saldo_stok, "adjusment" AS jenis
 					FROM barang_adjusment_stok
@@ -965,14 +808,13 @@ class PenjualanModel extends \App\Models\BaseModel
 				) AS tabel
 				LEFT JOIN gudang USING(id_gudang)
 				GROUP BY id_barang, id_gudang';
-	
+
 		$result = $this->db->query($sql)->getResultArray();
 		$list_stok = [];
 		foreach ($result as $val) {
 			$list_stok[$val['id_barang']][$val['id_gudang']] = $val['stok'];
 		}
-		
+
 		return $list_stok;
 	}
 }
-?>
