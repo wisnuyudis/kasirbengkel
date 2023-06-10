@@ -1,53 +1,57 @@
 $(document).ready(function() {
 	
 	$(document).undelegate('.setting-barang', 'click').delegate('.setting-barang', 'click', function()  {
-		$gudang = $('#id-gudang');
-		$gudang_clone = $gudang.clone().val($gudang.val())
-		$harga = $('#id-jenis-harga');
-		$harga_clone = $harga.clone().val($harga.val())
-		
-		content = '<div class="row mb-3">' + 
-						'<label class="col-sm-4">Gudang</label>' +
-						'<div class="col-sm-8 modal-gudang-option">' + 
-							 
-						'</div>' +
-					'</div>' + 
-					'<div class="row mb-3">' + 
-						'<label class="col-sm-4">Harga</label>' +
-						'<div class="col-sm-8 modal-harga-option">' + 
+		if($('.cekrole').val()=='kasir'){
+		}else{
+			$gudang = $('#id-gudang');
+			$gudang_clone = $gudang.clone().val($gudang.val())
+			$harga = $('#id-jenis-harga');
+			$harga_clone = $harga.clone().val($harga.val())
+			
+			content = '<div class="row mb-3">' + 
+							'<label class="col-sm-4">Gudang</label>' +
+							'<div class="col-sm-8 modal-gudang-option">' + 
+								 
+							'</div>' +
+						'</div>' + 
+						'<div class="row mb-3">' + 
+							'<label class="col-sm-4">Harga</label>' +
+							'<div class="col-sm-8 modal-harga-option">' + 
+								
+							'</div>' +
+						'</div>';
+			$bootbox =  bootbox.dialog({
+				title: 'Setting',
+				message: content,
+				buttons: {
+					cancel: {
+						label: 'Cancel'
+					},
+					success: {
+						label: 'OK',
+						className: 'btn-success submit',
+						callback: function() 
+						{
+							$('#id-gudang').val($gudang_clone.val());
+							$('#id-jenis-harga').val($harga_clone.val());
 							
-						'</div>' +
-					'</div>';
-		$bootbox =  bootbox.dialog({
-			title: 'Setting',
-			message: content,
-			buttons: {
-				cancel: {
-					label: 'Cancel'
-				},
-				success: {
-					label: 'OK',
-					className: 'btn-success submit',
-					callback: function() 
-					{
-						$('#id-gudang').val($gudang_clone.val());
-						$('#id-jenis-harga').val($harga_clone.val());
+							dataTables.destroy();
+							$('#tabel-data').find('tbody').remove();
+							$('#tabel-data').find('th').eq(0).css('width', '64px');
+	
+							loadDataTables(base_url + 'pos-kasir/getDataDTBarang?id_gudang=' + $('#id-gudang').val() + '&id_jenis_harga=' + $('#id-jenis-harga').val(), true);
+							changeHargaStok();
+							$bootbox.hide();
+						}
 						
-						dataTables.destroy();
-						$('#tabel-data').find('tbody').remove();
-						$('#tabel-data').find('th').eq(0).css('width', '64px');
-
-						loadDataTables(base_url + 'pos-kasir/getDataDTBarang?id_gudang=' + $('#id-gudang').val() + '&id_jenis_harga=' + $('#id-jenis-harga').val(), true);
-						changeHargaStok();
-						$bootbox.hide();
 					}
-					
 				}
-			}
-		});
+			});
+			
+			$bootbox.find('.modal-gudang-option').html('').append($gudang_clone.show());
+			$bootbox.find('.modal-harga-option').html('').append($harga_clone.show());
+		}
 		
-		$bootbox.find('.modal-gudang-option').html('').append($gudang_clone.show());
-		$bootbox.find('.modal-harga-option').html('').append($harga_clone.show());
 	})
 	
 	$('div.dataTables_filter input').on('keypress keyup', function() {
@@ -111,6 +115,14 @@ $(document).ready(function() {
 			$('#nama-customer').val(customer.nama_customer);
 			$('#del-customer').show();
 			$modal_customer.remove();
+
+			dataTables.destroy();
+			$('#tabel-data').find('tbody').remove();
+			$('#tabel-data').find('th').eq(0).css('width', '64px');
+			$('#id-jenis-harga').val(customer.id_jenis_harga);
+			$('#id-gudang').val(customer.id_gudang);
+			loadDataTables(base_url + 'pos-kasir/getDataDTBarang?id_gudang=' + $('#id-gudang').val() + '&id_jenis_harga=' + $('#id-jenis-harga').val(), true);
+			changeHargaStok();
 		});
 	});
 	
@@ -162,6 +174,14 @@ $(document).ready(function() {
 										$('#nama-customer').text(data.customer.nama_customer);
 										$bootbox.modal('hide');
 										$('#del-customer').show();
+
+										dataTables.destroy();
+										$('#tabel-data').find('tbody').remove();
+										$('#tabel-data').find('th').eq(0).css('width', '64px');
+										$('#id-jenis-harga').val(data.customer.id_jenis_harga);
+										$('#id-gudang').val(data.customer.id_gudang);
+										loadDataTables(base_url + 'pos-kasir/getDataDTBarang?id_gudang=' + $('#id-gudang').val() + '&id_jenis_harga=' + $('#id-jenis-harga').val(), true);
+										changeHargaStok();
 									} else {
 										show_alert('Error !!!', data.message, 'error');
 									}
