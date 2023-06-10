@@ -13,6 +13,7 @@
 					, 'username' => 'Username'
 					, 'email' => 'Email'
 					, 'nama' => 'Nama'
+					, 'nama_gudang' => 'Gudang'
 					, 'judul_role' => 'Role'
 					, 'verified' => 'Verified'
 					, 'ignore_btn_action' => 'Aksi'
