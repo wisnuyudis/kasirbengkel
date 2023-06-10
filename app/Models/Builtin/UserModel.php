@@ -43,8 +43,9 @@ class UserModel extends \App\Models\BaseModel
 		$query = $this->db->query($sql)->getRowArray();
 		$total_filtered = $query['jml'];
 		
-		$sql = 'SELECT user.*, GROUP_CONCAT(judul_role) AS judul_role FROM user 
+		$sql = 'SELECT user.*, GROUP_CONCAT(judul_role) AS judul_role, gudang.nama_gudang FROM user 
 				LEFT JOIN user_role USING(id_user) 
+				LEFT JOIN gudang USING(id_gudang) 
 				LEFT JOIN role ON user_role.id_role = role.id_role
 				' . $where . '
 				GROUP BY id_user
@@ -83,7 +84,7 @@ class UserModel extends \App\Models\BaseModel
 	{ 
 		$fields = ['nama', 'email', ];
 		if (in_array('update_all', $user_permission)) {
-			$add_field = ['username', 'status', 'verified', 'id_module'];
+			$add_field = ['username', 'status', 'verified', 'id_module', 'id_gudang'];
 			$fields = array_merge($fields, $add_field);
 		}
 
@@ -216,5 +217,10 @@ class UserModel extends \App\Models\BaseModel
 								);		
 		return $update;
 	}
+
+	public function getgudang() {
+		$sql = 'SELECT * FROM gudang';
+		$result = $this->db->query($sql)->getResultArray();
+		return $result;
+	}
 }
-?>
