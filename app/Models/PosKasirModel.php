@@ -43,7 +43,7 @@ class PosKasirModel extends \App\Models\BaseModel
 	{
 		$cekrole = $this->cekrole();
 		if ($cekrole['nama_role'] == 'kasir') {
-			$id_gudang = $cekrole['id_gudang'];
+			$id_gudang = '"' . $cekrole['id_gudang'] . '"';
 		} else {
 			$id_gudang = $id_gudang;
 		}
@@ -52,30 +52,37 @@ class PosKasirModel extends \App\Models\BaseModel
 
 		// Search
 		$search_all1 = @$this->request->getPost('search')['value'];
-		$search_all = str_replace(' ', '%', $search_all1);
 		$where = ' WHERE 1 = 1 ';
-		if ($search_all) {
-			$where .= ' and (kode_barang like "%' . $search_all1 . '%" OR nama_barang like "%' . $search_all1 . '%") ';
-			// Additional Search
-			// foreach ($columns as $val) {
-
-			// 	if (strpos($val['data'], 'ignore_search') !== false) 
-			// 		continue;
-
-			// 	if (strpos($val['data'], 'ignore') !== false)
-			// 		continue;
-
-			// 	$where_col[] = $val['data'] . ' LIKE "%' . $search_all . '%"';
-			// }
-			//  $where .= ' AND (' . join(' OR ', $where_col) . ') ';
-
-			//  $list_columns = ['barcode', 'kode_Barang'];
-			//  $where_col = [];
-			//  foreach ($list_columns as $column) {
-			// 	$where_col[] = $column . ' = "' . $search_all . '"';
-			//  }
-			//  $where .= ' OR (' . join(' OR ', $where_col) . ') ';
+		if (@$this->request->getPost('search')['value']) {
+			// $where .= ' and (kode_barang like "%' . $search_all1 . '%" OR nama_barang like "%' . $search_all1 . '%") ';
+			$where .= ' and ( MATCH(kode_barang) AGAINST("' . $search_all1 . '" IN BOOLEAN MODE) or
+			MATCH(nama_barang) AGAINST("' . $search_all1 . '" IN BOOLEAN MODE)) ';
 		}
+
+		// $search_all = str_replace(' ', '%', $search_all1);
+		// $where = ' WHERE 1 = 1 ';
+		// if ($search_all) {
+		// 	// $where .= ' and (kode_barang like "%' . $search_all1 . '%" OR nama_barang like "%' . $search_all1 . '%") ';
+		// 	// Additional Search
+		// 	foreach ($columns as $val) {
+
+		// 		if (strpos($val['data'], 'ignore_search') !== false)
+		// 			continue;
+
+		// 		if (strpos($val['data'], 'ignore') !== false)
+		// 			continue;
+
+		// 		$where_col[] = $val['data'] . ' LIKE "%' . $search_all . '%"';
+		// 	}
+		// 	$where .= ' AND (' . join(' OR ', $where_col) . ') ';
+
+		// 	$list_columns = ['barcode', 'kode_Barang'];
+		// 	$where_col = [];
+		// 	foreach ($list_columns as $column) {
+		// 		$where_col[] = $column . ' = "' . $search_all . '"';
+		// 	}
+		// 	$where .= ' OR (' . join(' OR ', $where_col) . ') ';
+		// }
 
 		// Order		
 		$order_data = $this->request->getPost('order');
@@ -225,7 +232,7 @@ class PosKasirModel extends \App\Models\BaseModel
 		return ['data' => $data, 'total_filtered' => $total_filtered];
 	}
 
-	private function getListHargaBarang($id_barang, $id_gudang)
+	function getListHargaBarang($id_barang, $id_gudang)
 	{
 
 		$sql = 'SELECT * FROM jenis_harga';
@@ -235,7 +242,8 @@ class PosKasirModel extends \App\Models\BaseModel
 			// $sql = 'SELECT id_barang, (
 			// 		SELECT harga 
 			// 		FROM barang_harga
-			// 		WHERE id_jenis_harga = ' . $val['id_jenis_harga'] . ' AND id_barang = barang.id_barang 
+			// 		left join barang_adjusment_stok using(id_barang)
+			// 		WHERE id_jenis_harga = ' . $val['id_jenis_harga'] . ' AND id_barang = barang.id_barang
 			// 		AND jenis = "harga_jual" 
 			// 		ORDER BY barang_harga.tgl_input DESC 
 			// 		LIMIT 1
@@ -247,7 +255,7 @@ class PosKasirModel extends \App\Models\BaseModel
 					SELECT harga 
 					FROM barang_harga
 					left join barang_adjusment_stok using(id_barang)
-					WHERE id_jenis_harga = ' . $val['id_jenis_harga'] . ' AND barang_adjusment_stok.id_gudang="' . $id_gudang . '" AND id_barang = barang.id_barang 
+					WHERE id_jenis_harga = ' . $val['id_jenis_harga'] . ' AND barang_adjusment_stok.id_gudang=' . $id_gudang . ' AND id_barang = barang.id_barang 
 					AND jenis = "harga_jual" 
 					ORDER BY barang_harga.tgl_input DESC 
 					LIMIT 1
@@ -348,6 +356,13 @@ class PosKasirModel extends \App\Models\BaseModel
 		$data = $this->db->query('select b.id_role, c.nama_role, a.id_gudang from user a 
 		left join user_role b on b.id_user=a.id_user
 		left join role c on c.id_role=b.id_role where a.id_user=' . $_SESSION['user']['id_user'])->getRowArray();
+		return $data;
+	}
+
+	function telo()
+	{
+		$sql = 'SELECT * FROM barang WHERE id_barang in(1,2,3,4,5,6,7,8,9,10)';
+		$data = $this->db->query($sql)->getResultArray();
 		return $data;
 	}
 }
